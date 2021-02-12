@@ -1,0 +1,8 @@
+package logrels
+
+sourcedir = src
+
+modules = STLC.Ty
+        , STLC.Tait
+
+opts = "-p contrib"
