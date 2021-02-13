@@ -27,8 +27,7 @@ data Term : TEnv -> Term0 -> Ty -> Type where
   I   : {n : Nat}                     -> Term g (I0 n)       A
   Var : {x : String} ->
         lookupEnv g x = Just a        -> Term g (Var0 x)     a
-  Lam : {x : String} -> {t0 : Term0} ->
-        {a : Ty} ->
+  Lam : {x : String} -> {t0 : Term0} -> {a : Ty} ->
         Term (Cons g x a) t0 b         -> Term g (Lam0 x t0) (a~>b)
   App : Term g f (a~>b) -> Term g x a -> Term g (App0 f x)   b
 
@@ -44,7 +43,7 @@ data Eval : DEnv -> Term0 -> Val -> Type where
   ELam :                            Eval e (Lam0 x t) (VCl e x t)
   EApp : Eval e f (VCl e0 x t0) ->
          Eval e a va ->
-         Eval (Cons e x va) t0 v -> Eval e (App0 f a)  v
+         Eval (Cons e0 x va) t0 v -> Eval e (App0 f a)  v
 
 -- the logical relation
 Equiv : Val -> Ty -> Type
@@ -77,9 +76,13 @@ EquivExtend eq ee with (decEq x s)
   EquivExtend eq ee | No ctra = ee
 
 Normalisation : {e : DEnv} ->
-                Term g t1 ty -> EquivEnv e g -> (v : Val ** (Eval e t1 v, Equiv v ty))
+                Term g t0 ty -> EquivEnv e g -> (v : Val ** (Eval e t0 v, Equiv v ty))
 Normalisation (I {n})          ee = (VI n ** (EI, (n ** Refl)))
 Normalisation (Var prf)        ee = let (v**(prf1,eq)) = Look ee prf in
                                     (v ** (EVar prf1, eq))
 Normalisation (Lam {x} {t0} t) ee = (VCl e x t0 ** (ELam, (x ** t0 ** e ** (Refl, \eq => Normalisation t (EquivExtend eq ee)))))
-Normalisation (App t1 t2)      ee = ?wat
+Normalisation (App t1 t2)      ee = let (_    ** (ev1, (_ ** _ ** _ ** (prf1, f1)))) = Normalisation t1 ee
+                                        (_    ** (ev2, eq2)) = Normalisation t2 ee
+                                        (val3 ** (ev3, eq3)) = f1 eq2
+                                     in
+                                    (val3 ** (EApp (rewrite sym prf1 in ev1) ev2 ev3, eq3))
