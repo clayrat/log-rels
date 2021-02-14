@@ -14,7 +14,6 @@ indexAllPub : Elem x xs -> All p xs -> p x
 indexAllPub  Here     (p::_  ) = p
 indexAllPub (There e) ( _::ps) = indexAllPub e ps
 
-
 data Term : List Ty -> Ty -> Type where
   TT  : Term g A
   Var : Elem a g -> Term g a
@@ -50,16 +49,13 @@ data Progressing : State z -> Type where
 load : Term [] a -> State a
 load t = Exp (MkClos [] t) []
 
-doApp : Val (a ~> b) -> Val a -> Cont b z -> State z
-doApp (VCl e t) u k = Exp (MkClos (u :: e) t) k
-
 progress : (s : State z) -> Progressing s -> State z
 progress (Exp (MkClos e  TT      ) k) PExp = Con VT k
 progress (Exp (MkClos e (Var el) ) k) PExp = Con (indexAllPub el e) k
 progress (Exp (MkClos e (Lam t)  ) k) PExp = Con (VCl e t) k
 progress (Exp (MkClos e (App t u)) k) PExp = Exp (MkClos e t) (CF (MkClos e u) :: k)
-progress (Con v (CF c::k))            PCon = Exp c (CV v::k)
-progress (Con v (CV u::k))            PCon = doApp u v k
+progress (Con v (CF  c       ::k))    PCon = Exp c (CV v::k)
+progress (Con v (CV (VCl e t)::k))    PCon = Exp (MkClos (v :: e) t) k
 
 data Step : State a -> State a -> Type where
   It : (sp : Progressing s) -> Step s (progress s sp)
