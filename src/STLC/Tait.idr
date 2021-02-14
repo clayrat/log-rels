@@ -28,7 +28,7 @@ data Term : TEnv -> Term0 -> Ty -> Type where
   Var : {x : String} ->
         lookupEnv g x = Just a        -> Term g (Var0 x)     a
   Lam : {x : String} -> {t0 : Term0} -> {a : Ty} ->
-        Term (Cons g x a) t0 b         -> Term g (Lam0 x t0) (a~>b)
+        Term (Cons g x a) t0 b        -> Term g (Lam0 x t0) (a~>b)
   App : Term g f (a~>b) -> Term g x a -> Term g (App0 f x)   b
 
 mutual
