@@ -81,7 +81,7 @@ EnvOk e = {0 a : Ty} -> (el : Elem a g) -> ValOk (indexAllPub el e)
 
 -- a term is good if when combined with any good environment the resulting closure is good
 TermOk : Term g a -> Type
-TermOk t = {e : Env g} -> EnvOk e -> (v : Val a ** (ValOk v, {0 z : Ty} -> (k : Cont a z) -> Steps (Exp (MkClos e t) k) (Con v k)))
+TermOk t = {e : Env g} -> EnvOk e -> ClosOk (MkClos e t)
 
 LamOk : {t : Term (a::g) b} -> TermOk t -> TermOk (Lam t)
 LamOk tok eok = (VCl e t ** ( \v, vok => tok $ \case
