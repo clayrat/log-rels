@@ -5,14 +5,10 @@ import Data.List.Elem
 import Data.List.Quantifiers
 import Decidable.Equality
 import Path
+import Quantifiers
 import STLC.Ty
 
 %default total
-
--- TODO change Data.List.Quantifiers.indexAll to `public export`
-indexAllPub : Elem x xs -> All p xs -> p x
-indexAllPub  Here     (p::_  ) = p
-indexAllPub (There e) ( _::ps) = indexAllPub e ps
 
 data Term : List Ty -> Ty -> Type where
   TT  : Term g A
